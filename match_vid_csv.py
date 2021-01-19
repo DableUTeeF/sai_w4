@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-from datetime import datetime, timedelta
+from datetime import datetime
 
 if __name__ == '__main__':
     vids = os.listdir('/media/palm/BiggerData/denso/Denso-Trainingset/20200622/CtlEquip_10')
