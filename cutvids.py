@@ -14,5 +14,6 @@ while True:
     idx += 1
 
 for i in range(5):
+    cv2.rectangle(frames[i], (490, 58), (630, 190), (0, 255, 0))
     cv2.imshow(str(i), frames[i])
 cv2.waitKey()

@@ -20,7 +20,7 @@ if __name__ == '__main__':
                                           normalize,
                                           ])
 
-    dataset = DensoDataset(transform=train_transform)
+    dataset = DensoDataset(transform=train_transform, sequence=False)
     indices = list(range(len(dataset)))
     split = int(np.floor(0.3 * len(dataset)))
     np.random.seed(8888)
@@ -35,7 +35,7 @@ if __name__ == '__main__':
 
     model = Model()
     model = model.cuda()
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-6)
+    optimizer = torch.optim.SGD(model.parameters(), lr=1e-2, momentum=0.9)
     criterion = torch.nn.CrossEntropyLoss()
     for epoch in range(30):
         print('Epoch', epoch + 1)
