@@ -63,7 +63,7 @@ if __name__ == '__main__':
                 print(obj)
                 break
             print(d_datetime)
-
+    json.dump(data, open('submission.json', 'w'))
     with open('submission.csv', 'w') as wr:
         wr.write('Ids,Prediction\n')
         for obj in answer:
@@ -71,5 +71,5 @@ if __name__ == '__main__':
             if obj['result'] > 100:
                 wr.write('"Yes')
             else:
-                wr.write("No")
+                wr.write('"No')
             wr.write(',No"\n')

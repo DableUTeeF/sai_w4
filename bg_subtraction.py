@@ -37,7 +37,7 @@ def process_vids(file, root):
         contours, h = cv2.findContours(sub, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         for cnt in contours:
             area = cv2.contourArea(cnt)
-            if area < 1000:
+            if area < 500:
                 sub = cv2.drawContours(sub, [cnt], -1, (0, 0, 0), -1)
 
         # cv2.imshow('sub', sub)
