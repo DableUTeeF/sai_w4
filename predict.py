@@ -69,7 +69,7 @@ if __name__ == '__main__':
         for obj in answer:
             wr.write(f"{obj['id']},")
             if obj['result'] > 100:
-                wr.write("Yes")
+                wr.write('"Yes')
             else:
                 wr.write("No")
-            wr.write(",No\n")
+            wr.write(',No"\n')
