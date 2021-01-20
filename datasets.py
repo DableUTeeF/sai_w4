@@ -186,7 +186,7 @@ def bg_sub():
             found_something = 0
             try:
                 for i in range(len(vidname) - 1):
-                    if vidname[i][0] < d_datetime < vidname[i + 1][0]:
+                    if vidname[i][0] < d_datetime <= vidname[i + 1][0]:
                         found_something = 1
                         cap = cv2.VideoCapture(os.path.join(folder, 'CtlEquip_10', vidname[i][1]))
                         frame_width = int(cap.get(3))
@@ -202,33 +202,6 @@ def bg_sub():
                         print('duration', duration)
                         print('expected_time', (d_datetime - vidname[i][0]).seconds)
                         print('frame_pos', frame_pos)
-
-                        idx = 0
-                        frames = [None for _ in range(10)]
-                        while True:
-                            ret, frame = cap.read()
-                            if frame is None:
-                                break
-                            if idx % 5 == 0:
-                                frames = [*frames[1:], frame]
-                            idx += 1
-                        break
-                    elif d_datetime == vidname[i + 1][0]:
-                        found_something = 1
-                        cap = cv2.VideoCapture(os.path.join(folder, 'CtlEquip_10', vidname[i + 1][1]))
-                        frame_width = int(cap.get(3))
-                        frame_height = int(cap.get(4))
-                        frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-                        fps = cap.get(cv2.CAP_PROP_FPS)
-                        duration = frame_count / fps
-
-                        frame_pos = (vidname[i + 1][0] - d_datetime).seconds * fps
-
-                        # print('fps', fps)
-                        # print('frame_count', frame_count)
-                        # print('duration', duration)
-                        # print('expected_time', (vidname[i + 1][0] - d_datetime).seconds)
-                        # print('frame_pos', frame_pos)
 
                         idx = 0
                         frames = [None for _ in range(10)]

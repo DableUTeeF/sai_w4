@@ -32,7 +32,6 @@ def process_vids(file, root):
         if raw_frame is None:
             break
         frame = cv2.cvtColor(raw_frame, cv2.COLOR_BGR2GRAY)
-        frame = cv2.putText(frame, f'{i}', (10, 75), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,))
         frame = cv2.GaussianBlur(frame, (5, 5), 0)
         sub = backSub.apply(frame)
 
@@ -40,8 +39,8 @@ def process_vids(file, root):
         # k = cv2.waitKey(1) & 0xff
         # if k == 27:
         #     raise KeyboardInterrupt
-        sub = cv2.rectangle(sub, (523, 48), (547, 72), (255, 0, 0))
-        raw_frame = cv2.rectangle(raw_frame, (525, 50), (545, 70), (0, 255, 0))
+        sub = cv2.rectangle(sub, (533, 48), (557, 72), (255, 0, 0))
+        raw_frame = cv2.rectangle(raw_frame, (535, 50), (555, 70), (0, 255, 0))
         # cv2.imshow('raw_frame', raw_frame)
         frames = [*frames[1:], raw_frame]
         subs = [*subs[1:], sub]
@@ -50,8 +49,8 @@ def process_vids(file, root):
     for s, f in zip(subs, frames):
         if not isinstance(s, np.ndarray):
             continue
-        if np.sum(s[50:70, 525:545] == 255) > max_sub:
-            max_sub = np.sum(s[50:70, 525:545] == 255)
+        if np.sum(s[50:70, 535:555] == 255) > max_sub:
+            max_sub = np.sum(s[50:70, 535:555] == 255)
             frame = f
             sub = s
     if sub is None:
@@ -61,7 +60,7 @@ def process_vids(file, root):
     try:
         cv2.imwrite(os.path.join('/media/palm/BiggerData/denso/subs', file + f'_f.jpg'),
                     frame)
-        cv2.imwrite(os.path.join('/media/palm/BiggerData/denso/subs', file + f'_{np.sum(sub[50:70, 525:545] == 255)}.jpg'),
+        cv2.imwrite(os.path.join('/media/palm/BiggerData/denso/subs', file + f'_{np.sum(sub[50:70, 525:555] == 255)}.jpg'),
                     sub)
     except Exception as e:
         print(e)
