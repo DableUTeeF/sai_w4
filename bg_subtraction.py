@@ -5,7 +5,13 @@ import multiprocessing
 from functools import partial
 
 
+def running_mean(x, N):
+    return np.convolve(x, np.ones(N)/N, mode='valid')
+
+
 def process_vids(file, root):
+    if '_4859_' not in file and '_5540_' not in file:
+        return 0, False
     cap = cv2.VideoCapture(os.path.join(root, file))
     frame_width = int(cap.get(3))
     frame_height = int(cap.get(4))
@@ -25,28 +31,21 @@ def process_vids(file, root):
     subs = [None for i in range(150)]
     frames = [None for i in range(150)]
     sub = None
-    hist_drop_frame = 0
-    hist_rise_frame = 0
-    previous_hist_sum = None
-    has_break = False
+    hist_sums = []
     for i in range(frame_count):
         ret, raw_frame = cap.read()
-        if i < frame_count - 150 or i < 75:
-            continue
         if raw_frame is None:
             break
         frame = cv2.cvtColor(raw_frame, cv2.COLOR_BGR2GRAY)
-        if previous_hist_sum is not None:
-            if previous_hist_sum - hist_sum > 15:
-                hist_drop_frame = i
-            elif hist_sum - previous_hist_sum > 15:
-                hist_rise_frame = i
-                if 14*60*fps < hist_rise_frame - hist_drop_frame < 16*60*fps:
-                    has_break = True
+
         # histogram
-        histogram = cv2.calcHist([frame], [0], None, [64], [0, 255])
+        histogram = cv2.calcHist([frame[260:, :220]], [0], None, [64], [0, 255])
         hist_max = np.argsort(histogram, 0)[::-1]
         hist_sum = np.sum(hist_max[:5])
+        hist_sums.append(hist_sum)
+
+        if i < frame_count - 150 or i < 75:
+            continue
 
         # background subtraction
         frame = cv2.GaussianBlur(frame, (5, 5), 0)
@@ -86,6 +85,23 @@ def process_vids(file, root):
                     sub)
     except Exception as e:
         print(e)
+    hist_sums = running_mean(hist_sums, 60 * 15)
+    hist_drop_frame = 0
+    hist_rise_frame = 0
+    for i in range(len(hist_sums) - 1000):
+        hist_sum = hist_sums[i]
+        if hist_sum > 50:
+            tresh = 10
+        else:
+            tresh = 5
+        if np.average(hist_sums[i - 500:i - 450]) - hist_sum > tresh and np.average(hist_sums[i - 500:i - 450]) - np.average(hist_sums[i:i + 500]) > tresh:
+            hist_drop_frame = i
+        elif hist_sum - np.average(hist_sums[i - 500:i - 450]) > tresh and np.average(hist_sums[i:i + 500]) - np.average(hist_sums[i - 500:i - 450]) > tresh:
+            hist_rise_frame = i
+    if hist_rise_frame - hist_drop_frame > 14*60*fps:
+        has_break = True
+    else:
+        has_break = False
     return np.sum(sub[50:70, 525:555] == 255), has_break
 
 if __name__ == '__main__':

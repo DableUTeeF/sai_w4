@@ -24,4 +24,5 @@ if __name__ == '__main__':
                 hist_rise_frame = i
         print(hist_drop_frame)
         print(hist_rise_frame)
+        print(hist_rise_frame - hist_drop_frame > 14*60*14.99)
 

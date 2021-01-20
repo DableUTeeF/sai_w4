@@ -74,7 +74,7 @@ if __name__ == '__main__':
                 wr.write('"Yes,')
             else:
                 wr.write('"No,')
-            if obj['has_break'] > 100:
+            if obj['has_break']:
                 wr.write('Yes"')
             else:
                 wr.write('No"\n')
