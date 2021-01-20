@@ -13,11 +13,11 @@ def process_vids(file, root):
     fps = cap.get(cv2.CAP_PROP_FPS)
     file = file.split('_')[-1].replace('.mp4', '')
     if fps == 0:
-        return
+        return 0
     if frame_count == 0:
-        return
-    if os.path.exists(os.path.join('/media/palm/BiggerData/denso/subs', file + f'_f.jpg')):
-        return
+        return 0
+    # if os.path.exists(os.path.join('/media/palm/BiggerData/denso/subs', file + f'_f.jpg')):
+    #     return
     # print('fps', fps)
     # print('frame_count', frame_count)
 
@@ -34,13 +34,18 @@ def process_vids(file, root):
         frame = cv2.cvtColor(raw_frame, cv2.COLOR_BGR2GRAY)
         frame = cv2.GaussianBlur(frame, (5, 5), 0)
         sub = backSub.apply(frame)
+        contours, h = cv2.findContours(sub, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        for cnt in contours:
+            area = cv2.contourArea(cnt)
+            if area < 1000:
+                sub = cv2.drawContours(sub, [cnt], -1, (0, 0, 0), -1)
 
         # cv2.imshow('sub', sub)
         # k = cv2.waitKey(1) & 0xff
         # if k == 27:
         #     raise KeyboardInterrupt
-        sub = cv2.rectangle(sub, (533, 48), (557, 72), (255, 0, 0))
-        raw_frame = cv2.rectangle(raw_frame, (535, 50), (555, 70), (0, 255, 0))
+        # sub = cv2.rectangle(sub, (533, 48), (557, 72), (255, 0, 0))
+        # raw_frame = cv2.rectangle(raw_frame, (535, 50), (555, 70), (0, 255, 0))
         # cv2.imshow('raw_frame', raw_frame)
         frames = [*frames[1:], raw_frame]
         subs = [*subs[1:], sub]
@@ -54,19 +59,21 @@ def process_vids(file, root):
             frame = f
             sub = s
     if sub is None:
-        return
+        return 0
     # print(np.sum(sub[50:70, 525:545] == 255))
     # print()
     try:
-        cv2.imwrite(os.path.join('/media/palm/BiggerData/denso/subs', file + f'_f.jpg'),
+        cv2.imwrite(os.path.join('/media/palm/BiggerData/denso/testdata/subs', file + f'_f.jpg'),
                     frame)
-        cv2.imwrite(os.path.join('/media/palm/BiggerData/denso/subs', file + f'_{np.sum(sub[50:70, 525:555] == 255)}.jpg'),
+        cv2.imwrite(os.path.join('/media/palm/BiggerData/denso/testdata/subs', file + f'_{np.sum(sub[50:70, 525:555] == 255)}.jpg'),
                     sub)
     except Exception as e:
         print(e)
+    return np.sum(sub[50:70, 525:555] == 255)
 
 if __name__ == '__main__':
     root = '/media/palm/BiggerData/denso/Denso-Trainingset/'
+    csv = '/media/palm/BiggerData/denso/super-ai-engineer-denso-lasi/test.csv'
     for folder in os.listdir(root):
         if not os.path.isdir(os.path.join(root, folder)):
             continue

@@ -1,7 +1,7 @@
 import os
 import cv2
 
-
+cv2.drawContours
 if __name__ == '__main__':
     root = '/media/palm/BiggerData/denso/images'
     for file in os.listdir(root):
