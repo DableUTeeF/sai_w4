@@ -26,13 +26,14 @@ if __name__ == '__main__':
             if vidname[i][0] < d_datetime <= vidname[i+1][0]:
                 found_something = True
                 frame_pos = (d_datetime - vidname[i][0]).seconds * 15
-                result = process_vids(vidname[i][1], '/media/palm/BiggerData/denso/testdata/all')
+                result, has_break = process_vids(vidname[i][1], '/media/palm/BiggerData/denso/testdata/all')
                 obj = {'frame': frame_pos,
                        'filename': vidname[i][1],
                        'loc': 'end',
                        'date': d_datetime.strftime('%Y-%m-%d %H:%M:%S'),
                        'id': int(idx),
                        'result': result,
+                       'has_break': has_break
                        }
                 print(obj)
                 answer.append(obj)
@@ -52,13 +53,14 @@ if __name__ == '__main__':
             if vidname[-1][0] < d_datetime:
                 found_something = True
                 frame_pos = (d_datetime - vidname[-1][0]).seconds * 15
-                result = process_vids(vidname[-1][1], '/media/palm/BiggerData/denso/testdata/all')
+                result, has_break = process_vids(vidname[-1][1], '/media/palm/BiggerData/denso/testdata/all')
                 obj = {'frame': frame_pos,
                        'filename': vidname[-1][1],
                        'loc': 'end',
                        'date': d_datetime.strftime('%Y-%m-%d %H:%M:%S'),
                        'id': int(idx),
-                       'result': result}
+                       'result': result,
+                       'has_break': has_break}
                 answer.append(obj)
                 print(obj)
                 break
@@ -69,7 +71,10 @@ if __name__ == '__main__':
         for obj in answer:
             wr.write(f"{obj['id']},")
             if obj['result'] > 100:
-                wr.write('"Yes')
+                wr.write('"Yes,')
             else:
-                wr.write('"No')
-            wr.write(',No"\n')
+                wr.write('"No,')
+            if obj['has_break'] > 100:
+                wr.write('Yes"')
+            else:
+                wr.write('No"\n')

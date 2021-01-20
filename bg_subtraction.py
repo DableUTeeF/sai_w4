@@ -13,9 +13,9 @@ def process_vids(file, root):
     fps = cap.get(cv2.CAP_PROP_FPS)
     file = file.split('_')[-1].replace('.mp4', '')
     if fps == 0:
-        return 0
+        return 0, False
     if frame_count == 0:
-        return 0
+        return 0, False
     # if os.path.exists(os.path.join('/media/palm/BiggerData/denso/subs', file + f'_f.jpg')):
     #     return
     # print('fps', fps)
@@ -25,6 +25,10 @@ def process_vids(file, root):
     subs = [None for i in range(150)]
     frames = [None for i in range(150)]
     sub = None
+    hist_drop_frame = 0
+    hist_rise_frame = 0
+    previous_hist_sum = None
+    has_break = False
     for i in range(frame_count):
         ret, raw_frame = cap.read()
         if i < frame_count - 150 or i < 75:
@@ -32,6 +36,19 @@ def process_vids(file, root):
         if raw_frame is None:
             break
         frame = cv2.cvtColor(raw_frame, cv2.COLOR_BGR2GRAY)
+        if previous_hist_sum is not None:
+            if previous_hist_sum - hist_sum > 15:
+                hist_drop_frame = i
+            elif hist_sum - previous_hist_sum > 15:
+                hist_rise_frame = i
+                if 14*60*fps < hist_rise_frame - hist_drop_frame < 16*60*fps:
+                    has_break = True
+        # histogram
+        histogram = cv2.calcHist([frame], [0], None, [64], [0, 255])
+        hist_max = np.argsort(histogram, 0)[::-1]
+        hist_sum = np.sum(hist_max[:5])
+
+        # background subtraction
         frame = cv2.GaussianBlur(frame, (5, 5), 0)
         sub = backSub.apply(frame)
         contours, h = cv2.findContours(sub, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -59,7 +76,7 @@ def process_vids(file, root):
             frame = f
             sub = s
     if sub is None:
-        return 0
+        return 0, False
     # print(np.sum(sub[50:70, 525:545] == 255))
     # print()
     try:
@@ -69,7 +86,7 @@ def process_vids(file, root):
                     sub)
     except Exception as e:
         print(e)
-    return np.sum(sub[50:70, 525:555] == 255)
+    return np.sum(sub[50:70, 525:555] == 255), has_break
 
 if __name__ == '__main__':
     root = '/media/palm/BiggerData/denso/Denso-Trainingset/'
